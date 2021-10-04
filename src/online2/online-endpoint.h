@@ -28,8 +28,12 @@
 #include "matrix/matrix-lib.h"
 #include "util/common-utils.h"
 #include "base/kaldi-error.h"
-#include "itf/transition-information.h"
+#include "feat/feature-functions.h"
+#include "feat/feature-mfcc.h"
+#include "feat/feature-plp.h"
+#include "itf/online-feature-itf.h"
 #include "lat/kaldi-lattice.h"
+#include "hmm/transition-model.h"
 #include "decoder/lattice-faster-online-decoder.h"
 #include "decoder/lattice-incremental-online-decoder.h"
 
@@ -149,7 +153,7 @@ struct OnlineEndpointConfig {
       rule1(false, 5.0, std::numeric_limits<BaseFloat>::infinity(), 0.0),
       rule2(true, 0.5, 2.0, 0.0),
       rule3(true, 1.0, 8.0, 0.0),
-      rule4(true, 2.0, std::numeric_limits<BaseFloat>::infinity(), 0.0),
+      rule4(true, 3.0, std::numeric_limits<BaseFloat>::infinity(), 0.0),
       rule5(false, 0.0, std::numeric_limits<BaseFloat>::infinity(), 20.0) { }
 
   void Register(OptionsItf *opts) {
@@ -159,7 +163,7 @@ struct OnlineEndpointConfig {
     rule1.RegisterWithPrefix("endpoint.rule1", opts);
     rule2.RegisterWithPrefix("endpoint.rule2", opts);
     rule3.RegisterWithPrefix("endpoint.rule3", opts);
-    rule4.RegisterWithPrefix("endpoint.rule4", opts);
+    rule4.RegisterWithPrefix("endpointp.rule4", opts);
     rule5.RegisterWithPrefix("endpoint.rule5", opts);
   }
 };
@@ -172,7 +176,7 @@ struct OnlineEndpointConfig {
 /// This function returns true if this set of endpointing
 /// rules thinks we should terminate decoding.  Note: in verbose
 /// mode it will print logging information when returning true.
-bool EndpointDetected(const OnlineEndpointConfig &config,
+int EndpointDetected(const OnlineEndpointConfig &config,
                       int32 num_frames_decoded,
                       int32 trailing_silence_frames,
                       BaseFloat frame_shift_in_seconds,
@@ -185,7 +189,7 @@ bool EndpointDetected(const OnlineEndpointConfig &config,
 /// BestPathEnd() and TraceBackOneLink() functions of LatticeFasterOnlineDecoder
 /// to do this efficiently.
 template <typename DEC>
-int32 TrailingSilenceLength(const TransitionInformation &tmodel,
+int32 TrailingSilenceLength(const TransitionModel &tmodel,
                             const std::string &silence_phones,
                             const DEC &decoder);
 
@@ -193,9 +197,9 @@ int32 TrailingSilenceLength(const TransitionInformation &tmodel,
 /// This is a higher-level convenience function that works out the
 /// arguments to the EndpointDetected function above, from the decoder.
 template <typename DEC>
-bool EndpointDetected(
+int EndpointDetected(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const DEC &decoder);
 

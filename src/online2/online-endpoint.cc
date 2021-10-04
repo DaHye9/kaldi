@@ -42,8 +42,7 @@ static bool RuleActivated(const OnlineEndpointRule &rule,
   }
   return ans;
 }
-
-bool EndpointDetected(const OnlineEndpointConfig &config,
+int EndpointDetected(const OnlineEndpointConfig &config,
                       int32 num_frames_decoded,
                       int32 trailing_silence_frames,
                       BaseFloat frame_shift_in_seconds,
@@ -55,24 +54,24 @@ bool EndpointDetected(const OnlineEndpointConfig &config,
 
   if (RuleActivated(config.rule1, "rule1",
                     trailing_silence, final_relative_cost, utterance_length))
-    return true;
+    return 1;
   if (RuleActivated(config.rule2, "rule2",
                     trailing_silence, final_relative_cost, utterance_length))
-    return true;
+    return 1;
   if (RuleActivated(config.rule3, "rule3",
                     trailing_silence, final_relative_cost, utterance_length))
-    return true;
+    return 2;
   if (RuleActivated(config.rule4, "rule4",
                     trailing_silence, final_relative_cost, utterance_length))
-    return true;
+    return 1;
   if (RuleActivated(config.rule5, "rule5",
                     trailing_silence, final_relative_cost, utterance_length))
-    return true;
-  return false;
+    return 1;
+  return 0;
 }
 
 template <typename DEC>
-int32 TrailingSilenceLength(const TransitionInformation &tmodel,
+int32 TrailingSilenceLength(const TransitionModel &tmodel,
                             const std::string &silence_phones_str,
                             const DEC &decoder) {
   std::vector<int32> silence_phones;
@@ -107,9 +106,9 @@ int32 TrailingSilenceLength(const TransitionInformation &tmodel,
 }
 
 template <typename DEC>
-bool EndpointDetected(
+int EndpointDetected(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const DEC &decoder) {
   if (decoder.NumFramesDecoded() == 0) return false;
@@ -129,48 +128,48 @@ bool EndpointDetected(
 // Instantiate EndpointDetected for the types we need.
 // It will require TrailingSilenceLength so we don't have to instantiate that.
 template
-bool EndpointDetected<LatticeFasterOnlineDecoderTpl<fst::Fst<fst::StdArc> > >(
+int EndpointDetected<LatticeFasterOnlineDecoderTpl<fst::Fst<fst::StdArc> > >(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const LatticeFasterOnlineDecoderTpl<fst::Fst<fst::StdArc> > &decoder);
 
 
 template
-bool EndpointDetected<LatticeFasterOnlineDecoderTpl<fst::ConstGrammarFst > >(
+int EndpointDetected<LatticeFasterOnlineDecoderTpl<fst::ConstGrammarFst > >(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const LatticeFasterOnlineDecoderTpl<fst::ConstGrammarFst > &decoder);
 
 
 template
-bool EndpointDetected<LatticeFasterOnlineDecoderTpl<fst::VectorGrammarFst > >(
+int EndpointDetected<LatticeFasterOnlineDecoderTpl<fst::VectorGrammarFst > >(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const LatticeFasterOnlineDecoderTpl<fst::VectorGrammarFst > &decoder);
 
 
 template
-bool EndpointDetected<LatticeIncrementalOnlineDecoderTpl<fst::Fst<fst::StdArc> > >(
+int EndpointDetected<LatticeIncrementalOnlineDecoderTpl<fst::Fst<fst::StdArc> > >(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const LatticeIncrementalOnlineDecoderTpl<fst::Fst<fst::StdArc> > &decoder);
 
 template
-bool EndpointDetected<LatticeIncrementalOnlineDecoderTpl<fst::ConstGrammarFst > >(
+int EndpointDetected<LatticeIncrementalOnlineDecoderTpl<fst::ConstGrammarFst > >(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const LatticeIncrementalOnlineDecoderTpl<fst::ConstGrammarFst > &decoder);
 
 
 template
-bool EndpointDetected<LatticeIncrementalOnlineDecoderTpl<fst::VectorGrammarFst > >(
+int EndpointDetected<LatticeIncrementalOnlineDecoderTpl<fst::VectorGrammarFst > >(
     const OnlineEndpointConfig &config,
-    const TransitionInformation &tmodel,
+    const TransitionModel &tmodel,
     BaseFloat frame_shift_in_seconds,
     const LatticeIncrementalOnlineDecoderTpl<fst::VectorGrammarFst > &decoder);
 

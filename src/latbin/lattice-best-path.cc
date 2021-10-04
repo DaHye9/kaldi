@@ -88,6 +88,8 @@ int main(int argc, char *argv[]) {
       // implementation of shortest-path for CompactLattice.
       Lattice best_path;
       ConvertLattice(clat_best_path, &best_path);
+
+      std::string result = ""; //key
       if (best_path.Start() == fst::kNoStateId) {
         KALDI_WARN << "Best-path failed for key " << key;
         n_fail++;
@@ -100,24 +102,27 @@ int main(int argc, char *argv[]) {
                   << weight.Value1() << " + " << weight.Value2() << " = "
                   << (weight.Value1() + weight.Value2())
                   << " over " << alignment.size() << " frames.";
-        if (transcriptions_wspecifier != "")
-          transcriptions_writer.Write(key, words);
-        if (alignments_wspecifier != "")
-          alignments_writer.Write(key, alignment);
+//        if (transcriptions_wspecifier != "")
+//          transcriptions_writer.Write(key, words);
+//        if (alignments_wspecifier != "")
+//          alignments_writer.Write(key, alignment);
         if (word_syms != NULL) {
-          std::cerr << key << ' ';
+          //std::cerr << key << ' ';
           for (size_t i = 0; i < words.size(); i++) {
             std::string s = word_syms->Find(words[i]);
             if (s == "")
               KALDI_ERR << "Word-id " << words[i] <<" not in symbol table.";
-            std::cerr << s << ' ';
+            //std::cerr << s;
+	    //result += ' ';
+	    result += s;
           }
-          std::cerr << '\n';
+	  std::cerr << '\n';
         }
         n_done++;
         n_frame += alignment.size();
         tot_weight = Times(tot_weight, weight);
       }
+    std::cout << result << std::endl;
     }
 
     BaseFloat tot_weight_float = tot_weight.Value1() + tot_weight.Value2();

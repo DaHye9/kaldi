@@ -35,7 +35,9 @@ void GetDiagnosticsAndPrintOutput(const std::string &utt,
                                   const fst::SymbolTable *word_syms,
                                   const CompactLattice &clat,
                                   int64 *tot_num_frames,
-                                  double *tot_like) {
+                                  double *tot_like,
+				  int now_end,
+				  int *cnt) {
   if (clat.NumStates() == 0) {
     KALDI_WARN << "Empty lattice.";
     return;
@@ -61,18 +63,29 @@ void GetDiagnosticsAndPrintOutput(const std::string &utt,
                 << " frames, = " << (-weight.Value1() / num_frames)
                 << ',' << (weight.Value2() / num_frames);
 
+  std::string result = "";
+
   if (word_syms != NULL) {
-    std::cerr << utt << ' ';
+//    std::cerr << utt << ' ';
     for (size_t i = 0; i < words.size(); i++) {
       std::string s = word_syms->Find(words[i]);
       if (s == "")
         KALDI_ERR << "Word-id " << words[i] << " not in symbol table.";
-      std::cerr << s << ' ';
+//      result += ' ';
+      result += s;
+//      std::cerr << s << ' ';
     }
-    std::cerr << std::endl;
+    if (now_end == 2)
+      if (*cnt == 2 && result.compare("") != 0 ) result += '\n';
+//	std::cerr << std::endl;
+//    std::cerr << std::endl;
+    }
+  std::cout << result << std::endl;
   }
-}
-
+//  Py_Initialize();
+//  PyRun_SimpleString("from pykospacing import Spacing; spacing = Spacing();");
+//  PyRun_SimpleString("f_result = spacing(utt); print(f_result)");
+//  Py_Finalize();
 }
 
 int main(int argc, char *argv[]) {
@@ -155,8 +168,8 @@ int main(int argc, char *argv[]) {
     }
 
     Matrix<double> global_cmvn_stats;
-    if (feature_opts.global_cmvn_stats_rxfilename != "")
-      ReadKaldiObject(feature_opts.global_cmvn_stats_rxfilename,
+    if (feature_info.global_cmvn_stats_rxfilename != "")
+      ReadKaldiObject(feature_info.global_cmvn_stats_rxfilename,
                       &global_cmvn_stats);
 
     TransitionModel trans_model;
@@ -189,6 +202,7 @@ int main(int argc, char *argv[]) {
     int32 num_done = 0, num_err = 0;
     double tot_like = 0.0;
     int64 num_frames = 0;
+    int cnt = 0;
 
     SequentialTokenVectorReader spk2utt_reader(spk2utt_rspecifier);
     RandomAccessTableReader<WaveHolder> wav_reader(wav_rspecifier);
@@ -206,6 +220,7 @@ int main(int argc, char *argv[]) {
 
       for (size_t i = 0; i < uttlist.size(); i++) {
         std::string utt = uttlist[i];
+	KALDI_VLOG(2) << utt;
         if (!wav_reader.HasKey(utt)) {
           KALDI_WARN << "Did not find audio for utterance " << utt;
           num_err++;
@@ -241,6 +256,8 @@ int main(int argc, char *argv[]) {
 
         int32 samp_offset = 0;
         std::vector<std::pair<int32, BaseFloat> > delta_weights;
+	
+	int now_end;
 
         while (samp_offset < data.Dim()) {
           int32 samp_remaining = data.Dim() - samp_offset;
@@ -266,9 +283,17 @@ int main(int argc, char *argv[]) {
           }
 
           decoder.AdvanceDecoding();
-
-          if (do_endpointing && decoder.EndpointDetected(endpoint_opts)) {
-            break;
+	  
+          if (do_endpointing && (now_end = decoder.EndpointDetected(endpoint_opts))) {
+            if (now_end == 2) {
+		KALDI_VLOG(2) << "paragraph endpoint";
+		cnt++;
+		break;
+	    } else if (now_end == 1) {
+		KALDI_VLOG(2) << "real endpoint";
+		cnt = 0;
+		break;
+	    }
           }
         }
         decoder.FinalizeDecoding();
@@ -278,7 +303,7 @@ int main(int argc, char *argv[]) {
         decoder.GetLattice(end_of_utterance, &clat);
 
         GetDiagnosticsAndPrintOutput(utt, word_syms, clat,
-                                     &num_frames, &tot_like);
+                                     &num_frames, &tot_like, now_end, &cnt);
 
         decoding_timer.OutputStats(&timing_stats);
 
@@ -310,4 +335,5 @@ int main(int argc, char *argv[]) {
     std::cerr << e.what();
     return -1;
   }
+  return 0;
 } // main()
