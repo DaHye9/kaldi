@@ -76,7 +76,9 @@ void GetDiagnosticsAndPrintOutput(const std::string &utt,
 //      std::cerr << s << ' ';
     }
     if (now_end == 2)
-      if (*cnt == 2 && result.compare("") != 0 ) result += '\n';
+      if (*cnt == 2)
+	if (result.compare("") == 0) result += '^';
+      else *cnt = 1;
 //	std::cerr << std::endl;
 //    std::cerr << std::endl;
     }
