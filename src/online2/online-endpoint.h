@@ -154,7 +154,7 @@ struct OnlineEndpointConfig {
       rule2(true, 0.5, 2.0, 0.0),
       rule3(true, 1.0, 8.0, 0.0),
       rule4(true, 3.0, std::numeric_limits<BaseFloat>::infinity(), 0.0),
-      rule5(false, 0.0, std::numeric_limits<BaseFloat>::infinity(), 20.0) { }
+      rule5(false, 0.0, std::numeric_limits<BaseFloat>::infinity(), std::numeric_limits<BaseFloat>::infinity()) { }
 
   void Register(OptionsItf *opts) {
     opts->Register("endpoint.silence-phones", &silence_phones, "List of phones "
@@ -163,7 +163,7 @@ struct OnlineEndpointConfig {
     rule1.RegisterWithPrefix("endpoint.rule1", opts);
     rule2.RegisterWithPrefix("endpoint.rule2", opts);
     rule3.RegisterWithPrefix("endpoint.rule3", opts);
-    rule4.RegisterWithPrefix("endpointp.rule4", opts);
+    rule4.RegisterWithPrefix("endpoint.rule4", opts);
     rule5.RegisterWithPrefix("endpoint.rule5", opts);
   }
 };

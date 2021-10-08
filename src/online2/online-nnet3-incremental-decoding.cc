@@ -58,7 +58,7 @@ void SingleUtteranceNnet3IncrementalDecoderTpl<FST>::GetBestPath(bool end_of_utt
 }
 
 template <typename FST>
-bool SingleUtteranceNnet3IncrementalDecoderTpl<FST>::EndpointDetected(
+int SingleUtteranceNnet3IncrementalDecoderTpl<FST>::EndpointDetected(
     const OnlineEndpointConfig &config) {
   BaseFloat output_frame_shift =
       input_feature_frame_shift_in_seconds_ *

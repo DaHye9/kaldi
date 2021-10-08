@@ -94,7 +94,7 @@ class SingleUtteranceNnet3DecoderTpl {
 
   /// This function calls EndpointDetected from online-endpoint.h,
   /// with the required arguments.
-  bool EndpointDetected(const OnlineEndpointConfig &config);
+  int EndpointDetected(const OnlineEndpointConfig &config);
 
   const LatticeFasterOnlineDecoderTpl<FST> &Decoder() const { return decoder_; }
 

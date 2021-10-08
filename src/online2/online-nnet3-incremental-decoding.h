@@ -113,7 +113,7 @@ class SingleUtteranceNnet3IncrementalDecoderTpl {
 
   /// This function calls EndpointDetected from online-endpoint.h,
   /// with the required arguments.
-  bool EndpointDetected(const OnlineEndpointConfig &config);
+  int EndpointDetected(const OnlineEndpointConfig &config);
 
   const LatticeIncrementalOnlineDecoderTpl<FST> &Decoder() const { return decoder_; }
 

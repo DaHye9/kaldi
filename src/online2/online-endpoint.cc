@@ -54,13 +54,13 @@ int EndpointDetected(const OnlineEndpointConfig &config,
 
   if (RuleActivated(config.rule1, "rule1",
                     trailing_silence, final_relative_cost, utterance_length))
-    return 1;
+    return 2;
   if (RuleActivated(config.rule2, "rule2",
                     trailing_silence, final_relative_cost, utterance_length))
     return 1;
   if (RuleActivated(config.rule3, "rule3",
                     trailing_silence, final_relative_cost, utterance_length))
-    return 2;
+    return 1;
   if (RuleActivated(config.rule4, "rule4",
                     trailing_silence, final_relative_cost, utterance_length))
     return 1;
